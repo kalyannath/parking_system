@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NoItemSelected from "../components/noItemSelected";
 import { AppDispatch, RootState } from "../redux/store";
 import HTTP from "../utils/http";
-import { parkingLotInitialized } from "../redux/features/parkingLot-slice";
+import { parkingLotInitialized, slotsCountChanged } from "../redux/features/parkingLot-slice";
 import { useEffect, useState } from "react";
 import Slot from "./slot";
 import { ParkingModel, ParkingSlotType } from "../models/parkingModel";
@@ -20,9 +20,9 @@ const ParkingLot = () => {
     const [selectedSlot, setSelectedSlot] = useState<ParkingSlotType>(ParkingModel);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const getAllParkingSlots = async (filter: string) => {
+    const getAllParkingSlots = async (filter: string, vehicleType: string, page: number, itemsPerFetch: number) => {
         try {
-            const resp = await HTTP.Get(`http://localhost:5000/parking/${parkingLotState.vehicleType}/${filter === "all" ? "all-slots" : filter === "available" ? "available-slots" : "occupied-slots"}`);
+            const resp = await HTTP.Get(`http://localhost:5000/parking/${vehicleType}/${filter === "all" ? "all-slots" : filter === "available" ? "available-slots" : "occupied-slots"}?page=${page}&limit=${itemsPerFetch}`);
             console.log("get list response::::::::::::::::", resp);
             const responseData = resp.data;
             dispatch(parkingLotInitialized(responseData.data));
@@ -31,8 +31,23 @@ const ParkingLot = () => {
         }
     }
 
+    const getAllParkingSlotsCount = async (filter: string, vehicleType: string) => {
+        try {
+            const resp = await HTTP.Get(`http://localhost:5000/parking/${vehicleType}/slot-count?filter=${filter}`);
+            console.log("get count response::::::::::::::::", resp);
+            const responseData = resp.data;
+            dispatch(slotsCountChanged(responseData.count));
+        } catch (error) {
+            console.log("error in getCompaniesListAPICall::::::::", error);
+        }
+    }
+
     useEffect(() => {
-        getAllParkingSlots(parkingLotState.filter);
+        getAllParkingSlots(parkingLotState.filter, parkingLotState.vehicleType, parkingLotState.currentPage, parkingLotState.itemsPerFetch);
+    }, [parkingLotState.filter, parkingLotState.vehicleType, parkingLotState.currentPage, parkingLotState.itemsPerFetch])
+
+    useEffect(() => {
+        getAllParkingSlotsCount(parkingLotState.filter, parkingLotState.vehicleType);
     }, [parkingLotState.filter, parkingLotState.vehicleType])
 
     if (parkingLotState.lot.length === 0) return (

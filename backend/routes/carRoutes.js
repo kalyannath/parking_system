@@ -8,7 +8,8 @@ const {
     getAllSlots,
     getAvailableSlots,
     getSlotInfo,
-    getOccupiedSlots
+    getOccupiedSlots,
+    getSlotCount
 } = require('../controllers/carController');
 const { 
     initializeParkingValidator, 
@@ -20,28 +21,31 @@ const { validateRequest } = require('../middleWares/errorHandler');
 
 const carRouter = express.Router();
 
-// Initialize parking slots
+// initi parking slots
 carRouter.post('/initialize',  initializeParkingValidator, validateRequest, initialize);
 
-// Reset parking slots
+// reset parking slots
 carRouter.post('/reset', reset);
 
-// Park a vehicle
+// park vehicle
 carRouter.post('/park', parkVehicleValidator, validateRequest, park);
 
-// Unpark a vehicle
+// unpark a vehicle
 carRouter.post('/unpark', unparkVehicleValidator, validateRequest, unpark);
 
-// Get all slots
+// get all slots
 carRouter.get('/all-slots', getAllSlots);
 
-// Check available slots
+// get available slots
 carRouter.get('/available-slots', getAvailableSlots);
 
-// Check occupied slots
+// get occupied slots
 carRouter.get('/occupied-slots', getOccupiedSlots);
 
-// Get vehicle information by slot number
+// get vehicle information using slot number
 carRouter.get('/slot/:slotNumber', getSlotInfoValidator, validateRequest, getSlotInfo);
+
+// get slot count bsed on a query filter "all" | "available" | "occupied"
+carRouter.get('/slot-count', getSlotCount);
 
 module.exports = carRouter;

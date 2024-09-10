@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import ToastMessage from "../components/toastMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { vehicleIsParked } from "../redux/features/parkingLot-slice";
+import { currenPageChanged, vehicleIsParked } from "../redux/features/parkingLot-slice";
 
 const ParkVehicleForm = (
     { onClose }:
@@ -26,6 +26,7 @@ const ParkVehicleForm = (
         .then(async (resp) => {
             console.log("success resp:::::::::", resp);
             dispatch(vehicleIsParked(resp.data.data));
+            dispatch(currenPageChanged(Math.ceil(resp.data.data.slotNumber / parkingLotState.itemsPerFetch)));
             onClose(); // to close dialog window
             toast.custom((t) => (<ToastMessage toastType="success" message={resp.data.message} t={t} />));
         })

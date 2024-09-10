@@ -8,7 +8,8 @@ const {
     getAllSlots,
     getAvailableSlots,
     getSlotInfo,
-    getOccupiedSlots
+    getOccupiedSlots,
+    getSlotCount
 } = require('../controllers/twoWheelerController');
 const { 
     initializeParkingValidator, 
@@ -20,28 +21,31 @@ const { validateRequest } = require('../middleWares/errorHandler');
 
 const twoWheelerRouter = express.Router();
 
-// Initialize parking slots
+// initi parking slots
 twoWheelerRouter.post('/initialize',  initializeParkingValidator, validateRequest, initialize);
 
-// Reset parking slots
+// reset parking slots
 twoWheelerRouter.post('/reset', reset);
 
-// Park a vehicle
+// park vehicle
 twoWheelerRouter.post('/park', parkVehicleValidator, validateRequest, park);
 
-// Unpark a vehicle
+// unpark a vehicle
 twoWheelerRouter.post('/unpark', unparkVehicleValidator, validateRequest, unpark);
 
-// Get all slots
+// get all slots
 twoWheelerRouter.get('/all-slots', getAllSlots);
 
-// Check available slots
+// get available slots
 twoWheelerRouter.get('/available-slots', getAvailableSlots);
 
-// Check occupied slots
+// get occupied slots
 twoWheelerRouter.get('/occupied-slots', getOccupiedSlots);
 
-// Get vehicle information by slot number
+// get vehicle information using slot number
 twoWheelerRouter.get('/slot/:slotNumber', getSlotInfoValidator, validateRequest, getSlotInfo);
+
+// get slot count bsed on a query filter "all" | "available" | "occupied"
+twoWheelerRouter.get('/slot-count', getSlotCount);
 
 module.exports = twoWheelerRouter;

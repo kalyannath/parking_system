@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Select, SelectItem, useDisclosure } from "@nextui-org/react";
+import { Button, Divider, Select, SelectItem, useDisclosure } from "@nextui-org/react";
 import Dialog from "../components/dialog";
 import InitializeParkingForm from "./initializeParkingForm";
 import { FaSquare, FaSquareParking } from "react-icons/fa6";
@@ -8,11 +8,12 @@ import { ChangeEvent, useState } from "react";
 import { SlotsFilters } from "../utils/slotsFIlters";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { filterChanged, parkingLotInitialized } from "../redux/features/parkingLot-slice";
+import { filterChanged, itemsPerFetchChanged, parkingLotInitialized, slotsCountChanged } from "../redux/features/parkingLot-slice";
 import HTTP from "../utils/http";
 import toast from "react-hot-toast";
 import ToastMessage from "../components/toastMessage";
 import ParkVehicleForm from "./parkVehicleForm";
+import PaginationComponent from "./pagination";
 
 const Configuration = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -26,6 +27,7 @@ const Configuration = () => {
             .then(async (resp) => {
                 console.log("success resp:::::::::", resp);
                 dispatch(parkingLotInitialized([]));
+                dispatch(slotsCountChanged(0));
                 toast.custom((t) => (<ToastMessage toastType="success" message={resp.data.message} t={t} />));
             })
             .catch((error) => {
@@ -50,12 +52,15 @@ const Configuration = () => {
 
     return (
         <div className="w-full space-y-4">
-            <div className="w-fill flex justify-center flex-wrap gap-4 items-center">
-                <span className="text-sm">Slots count: {parkingLotState.lot.length}</span>
+            <div className="w-full flex justify-center flex-wrap gap-4 items-end">
+                <span className="text-sm">Slots count: {parkingLotState.slotsCount}</span>
                 <Button size="sm" onPress={handleInitialize} variant="flat">Initialize Slots</Button>
                 <Button size="sm" variant="flat" onPress={handleResetClick}>Reset to 0</Button>
                 <Button size="sm" variant="flat" onPress={handlePark}>Park a Vehicle</Button>
+                <Divider orientation="vertical" className="h-8" />
                 <Select
+                    label="Filter"
+                    labelPlacement="outside"
                     className="max-w-40"
                     classNames={{ value: "text-xs" }}
                     size="sm"
@@ -69,6 +74,7 @@ const Configuration = () => {
                         </SelectItem>
                     ))}
                 </Select>
+                <PaginationComponent />
             </div>
             <div className="w-fill flex justify-center flex-wrap gap-4 items-center text-sm text-tertiaryForeground">
                 <div className="flex items-center gap-2"><FaSquare className="h-6 w-6 text-primary-green" /> Available</div>
@@ -89,15 +95,15 @@ const Configuration = () => {
                         </p>
                     </div>
                 }
-                modalBody={action === "initialize" ? 
+                modalBody={action === "initialize" ?
                     <InitializeParkingForm
                         onClose={onClose}
                     />
-                    : action === "park" ? 
-                    <ParkVehicleForm
-                        onClose={onClose}
-                    />
-                    : "Un-park a vehicle" // unpark    
+                    : action === "park" ?
+                        <ParkVehicleForm
+                            onClose={onClose}
+                        />
+                        : "Un-park a vehicle" // unpark    
                 }
             />
         </div>

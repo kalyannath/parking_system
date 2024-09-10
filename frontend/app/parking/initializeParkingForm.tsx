@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import ToastMessage from "../components/toastMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { parkingLotInitialized } from "../redux/features/parkingLot-slice";
+import { currenPageChanged, parkingLotInitialized, slotsCountChanged } from "../redux/features/parkingLot-slice";
 
 const InitializeParkingForm = (
     { onClose }:
@@ -20,13 +20,27 @@ const InitializeParkingForm = (
         vehicleType: "car",
     })
 
+    const getAllParkingSlots = async (filter: string, vehicleType: string, page: number, itemsPerFetch: number) => {
+        try {
+            const resp = await HTTP.Get(`http://localhost:5000/parking/${vehicleType}/${filter === "all" ? "all-slots" : filter === "available" ? "available-slots" : "occupied-slots"}?page=${page}&limit=${itemsPerFetch}`);
+            console.log("get list response::::::::::::::::", resp);
+            const responseData = resp.data;
+            dispatch(parkingLotInitialized(responseData.data));
+        } catch (error) {
+            console.log("error in getCompaniesListAPICall::::::::", error);
+        }
+    }
+
     const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log(e.target);
         await HTTP.Post(`http://localhost:5000/parking/${parkingLotState.vehicleType}/initialize`, { totalSlots: formData.totalSlots })
         .then(async (resp) => {
             console.log("success resp:::::::::", resp);
-            dispatch(parkingLotInitialized(resp.data.data))
+            // dispatch(parkingLotInitialized(parkingLotState.filter === "occupied" ? [] : resp.data.data));
+            getAllParkingSlots(parkingLotState.filter, parkingLotState.vehicleType, 1, parkingLotState.itemsPerFetch);
+            dispatch(currenPageChanged(1));
+            dispatch(slotsCountChanged(parkingLotState.filter === "occupied" ? 0 : formData.totalSlots));
             onClose(); // to close dialog window
             toast.custom((t) => (<ToastMessage toastType="success" message={resp.data.message} t={t} />));
         })

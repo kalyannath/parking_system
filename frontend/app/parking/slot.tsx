@@ -1,6 +1,5 @@
-import { Button, Card } from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
 import { ParkingSlotType } from "../models/parkingModel";
-import { LuLogOut } from "react-icons/lu";
 
 const Slot = (
     { slotData, handleSlotSelection }:
